@@ -34,10 +34,13 @@ void mostrarPalabra(string palabra, vector<bool>& adivinadas) {
     cout << endl;
 }
 
+int punteo(int punteo){
+    cout<<"punteos"<<endl;
+    return punteo;
+}
+
 main(){
     string palabra = palabra_a_jugar();
-
-    // Limpiamos el input para futuras entradas
     cin.ignore(1000, '\n');
 
     vector<bool> adivinadas(palabra.size(), false);
@@ -77,12 +80,30 @@ main(){
             system("cls");
             cout << "¡Felicidades! Has adivinado la palabra: " << palabra << endl;
             char dato;
+            switch (intentos){
+            case 1:
+                cout<<"Su puntuacion es 20"<<endl;
+                break;
+            case 2:
+                cout<<"su puntuacion es 40"<<endl;
+                break;
+            case 3:
+                cout<<"Su puntuacion es 60"<<endl;
+                break;
+            case 4:
+                cout<<"Su puntiuacion es 80"<<endl;
+                break;
+            default:
+                cout<<"Su puntuacion es 100"<<endl;
+                break;
+            }
             cin >> dato;
             return 0;
         }
     }
     char dato;
     cout << "Lo siento, se acabaron los intentos. La palabra era: " << palabra << endl;
+    cout<<"Su punteo es 0"<<endl;
     cin >> dato;
     return 0;
 }
