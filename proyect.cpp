@@ -1,109 +1,106 @@
 #include <iostream>
 #include <fstream>
 #include <list>
-#include <cstdlib>
 #include <ctime>
-#include <vector>
+#include <windows.h>
 
-using namespace std;
+struct Puntaje {
+    std::string nombre;
+    int puntaje;
+};
 
-string palabra_a_jugar(){
-    ifstream archivo("palabras.txt");
-    list<string> palabras;
-    string palabra;
-    while (archivo >> palabra) {
+bool compararPuntajes(const Puntaje& a, const Puntaje& b) {
+    return a.puntaje > b.puntaje;
+}
+
+void gotoxy(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+void imprimirPuntajes() {
+    gotoxy(80, 0);
+    std::cout << "SCORE" << std::endl;
+    std::ifstream archivoPuntajes("punteo.txt");
+    std::string linea;
+    std::list<Puntaje> puntajes;
+    while (std::getline(archivoPuntajes, linea)) {
+        size_t separador = linea.find('|');
+        Puntaje p = {linea.substr(0, separador), std::stoi(linea.substr(separador + 1))};
+        puntajes.push_back(p);
+    }
+    
+    puntajes.sort(compararPuntajes);
+
+    int y = 1;
+    for (const auto& p : puntajes) {
+        if (y > 5) break;
+        gotoxy(50, y++);
+        std::cout << p.nombre << " " << p.puntaje << std::endl;
+    }
+}
+
+int main() {
+    std::string nombre;
+    std::cout << "Ingrese su nombre: ";
+    std::cin >> nombre;
+
+    imprimirPuntajes();
+
+    std::ifstream archivoPalabras("palabras.txt");
+    std::list<std::string> palabras;
+    std::string palabra;
+
+    while (archivoPalabras >> palabra) {
         palabras.push_back(palabra);
     }
-    archivo.close();
-    srand(static_cast<unsigned int>(time(nullptr)));
-    int indexAleatorio = rand() % palabras.size();
-    auto iterador = palabras.begin();
-    advance(iterador, indexAleatorio);
-    string palabra_elegida = *iterador;
-    return palabra_elegida;
-}
 
-void mostrarPalabra(string palabra, vector<bool>& adivinadas) {
-    for (size_t i = 0; i < palabra.size(); ++i) {
-        if (adivinadas[i]) {
-            cout << palabra[i];
-        } else {
-            cout << "_";
-        }
-    }
-    cout << endl;
-}
+    srand(time(0));
+    auto it = palabras.begin();
+    std::advance(it, rand() % palabras.size());
+    std::string palabraSeleccionada = *it;
 
-int punteo(int punteo){
-    cout<<"punteos"<<endl;
-    return punteo;
-}
-
-main(){
-    string palabra = palabra_a_jugar();
-    cin.ignore(1000, '\n');
-
-    vector<bool> adivinadas(palabra.size(), false);
+    std::string palabraAdivinada(palabraSeleccionada.size(), '_');
     int intentos = 5;
 
-    while (intentos > 0) {
-        system("cls");
-        cout << palabra << endl;
-        cout << "Intentos restantes: " << intentos << endl;
-        mostrarPalabra(palabra, adivinadas);
-
+    while (intentos > 0 && palabraAdivinada != palabraSeleccionada) {
+        gotoxy(0, 2);
+        std::cout << "Palabra: " << palabraAdivinada << std::endl;
         char letra;
-        cout << "Introduce una letra: ";
-        cin >> letra;
+        std::cout << "Ingrese una letra: ";
+        std::cin >> letra;
 
-        bool acierto = false;
-        for (size_t i = 0; i < palabra.size(); ++i) {
-            if (palabra[i] == letra && !adivinadas[i]) {
-                adivinadas[i] = true;
-                acierto = true;
+        bool letraEncontrada = false;
+        for (size_t i = 0; i < palabraSeleccionada.size(); ++i) {
+            if (palabraSeleccionada[i] == letra) {
+                palabraAdivinada[i] = letra;
+                letraEncontrada = true;
             }
         }
 
-        if (!acierto) {
+        if (!letraEncontrada) {
             --intentos;
-        }
-        
-        bool haGanado = true;
-        for (bool adivinada : adivinadas) {
-            if (!adivinada) {
-                haGanado = false;
-                break;
-            }
+            std::cout << "Letra no encontrada. Intentos restantes: " << intentos << std::endl;
         }
 
-        if (haGanado) {
-            system("cls");
-            cout << "¡Felicidades! Has adivinado la palabra: " << palabra << endl;
-            char dato;
-            switch (intentos){
-            case 1:
-                cout<<"Su puntuacion es 20"<<endl;
-                break;
-            case 2:
-                cout<<"su puntuacion es 40"<<endl;
-                break;
-            case 3:
-                cout<<"Su puntuacion es 60"<<endl;
-                break;
-            case 4:
-                cout<<"Su puntiuacion es 80"<<endl;
-                break;
-            default:
-                cout<<"Su puntuacion es 100"<<endl;
-                break;
-            }
-            cin >> dato;
-            return 0;
-        }
+        imprimirPuntajes();
     }
-    char dato;
-    cout << "Lo siento, se acabaron los intentos. La palabra era: " << palabra << endl;
-    cout<<"Su punteo es 0"<<endl;
-    cin >> dato;
+
+    int puntaje = 0;
+    if (palabraAdivinada == palabraSeleccionada) {
+        puntaje = 20 * intentos;
+        std::ofstream archivoPuntajes("punteo.txt", std::ios_base::app);
+        archivoPuntajes << nombre << "|" << puntaje << "\n";
+        std::cout << "¡Has adivinado la palabra!" << std::endl;
+    } else {
+        std::cout << "No has adivinado la palabra." << std::endl;
+    }
+
+    std::cout << "Presiona ENTER para continuar...";
+    std::cin.ignore();
+    std::cin.get();
+
     return 0;
 }
