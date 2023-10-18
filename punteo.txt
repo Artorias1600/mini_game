@@ -1,3 +1,6 @@
 Gerardo|20
 Gerardo|80
 Manin|100
+Luis|80
+ll|60
+manin|20
