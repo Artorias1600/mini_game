@@ -71,6 +71,7 @@ int main() {
         system("cls");
         imprimirPuntajes(); 
         gotoxy(0, 2);
+        cout << "Tiene "<< intentos << " Intentos restantes"<< endl;
         cout << "Palabra: " << palabraAdivinada << endl;
         char letra;
         cout << "Ingrese una letra: ";
@@ -85,10 +86,7 @@ int main() {
         }
         if (!letraEncontrada) {
             --intentos;
-            cout << "Letra no encontrada. Intentos restantes: " << intentos << endl;
         }
-
-        imprimirPuntajes();
     }
 
     int puntaje = 0;
