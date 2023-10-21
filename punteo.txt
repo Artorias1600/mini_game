@@ -2,5 +2,6 @@ Gerardo|20
 Gerardo|80
 Manin|100
 Luis|80
-ll|60
+ll|10
 manin|20
+prueba2|40

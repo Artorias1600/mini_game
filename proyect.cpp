@@ -24,8 +24,8 @@ void gotoxy(int x, int y) {
 
 void imprimirPuntajes() {
     gotoxy(90, 0);
-    cout << "SCORE" << endl;
-    ifstream archivoPuntajes("punteo.txt");
+    cout << "TOP 5" << endl;
+    ifstream archivoPuntajes("PUNTEO.txt");
     string linea;
     list<Puntaje> puntajes;
     while (getline(archivoPuntajes, linea)) {
@@ -33,7 +33,7 @@ void imprimirPuntajes() {
         Puntaje p = {linea.substr(0, separador), stoi(linea.substr(separador + 1))};
         puntajes.push_back(p);
     }
-    
+
     puntajes.sort(compararPuntajes);
 
     int y = 1;
@@ -44,65 +44,96 @@ void imprimirPuntajes() {
     }
 }
 
-int main() {
-    string nombre;
-    cout << "Ingrese su nombre: ";
-    cin >> nombre;
-
-    imprimirPuntajes();
-
-    ifstream archivoPalabras("palabras.txt");
-    list<string> palabras;
-    string palabra;
-
-    while (archivoPalabras >> palabra) {
-        palabras.push_back(palabra);
+void imprimirPuntajesCompletos() {
+    gotoxy(5, 2);
+    cout << "PUNTAJES:" << endl;
+    ifstream archivoPuntajes("PUNTEO.txt");
+    string linea;
+    list<Puntaje> puntajes;
+    while (getline(archivoPuntajes, linea)) {
+        size_t separador = linea.find('|');
+        Puntaje p = {linea.substr(0, separador), stoi(linea.substr(separador + 1))};
+        puntajes.push_back(p);
     }
 
-    srand(time(0));
-    auto it = palabras.begin();
-    advance(it, rand() % palabras.size());
-    string palabraSeleccionada = *it;
+    puntajes.sort(compararPuntajes);
 
-    string palabraAdivinada(palabraSeleccionada.size(), '_');
-    int intentos = 5;
+    int y = 3;
+    for (const auto& p : puntajes) {
+        gotoxy(5, y++);
+        cout << p.nombre << " " << p.puntaje << endl;
+    }
+}
 
-    while (intentos > 0 && palabraAdivinada != palabraSeleccionada) {
+int main() {
+    char opcion;
+    do {
         system("cls");
-        imprimirPuntajes(); 
-        gotoxy(0, 2);
-        cout << "Tiene "<< intentos << " Intentos restantes"<< endl;
-        cout << "Palabra: " << palabraAdivinada << endl;
-        char letra;
-        cout << "Ingrese una letra: ";
-        cin >> letra;
+        string nombre;
+        cout << "BIENVENIDO AL JUEGO DEL AHORCADO" << endl;
+        cout << "Ingrese su nombre: ";
+        cin >> nombre;
 
-        bool letraEncontrada = false;
-        for (size_t i = 0; i < palabraSeleccionada.size(); ++i) {
-            if (palabraSeleccionada[i] == letra) {
-                palabraAdivinada[i] = letra;
-                letraEncontrada = true;
+        imprimirPuntajes();
+
+        ifstream archivoPalabras("PALABRAS.txt");
+        list<string> palabras;
+        string palabra;
+
+        while (archivoPalabras >> palabra) {
+            palabras.push_back(palabra);
+        }
+
+        srand(time(0));
+        auto it = palabras.begin();
+        advance(it, rand() % palabras.size());
+        string palabraSeleccionada = *it;
+
+        string palabraAdivinada(palabraSeleccionada.size(), '_');
+        int intentos = 5;
+
+        while (intentos > 0 && palabraAdivinada != palabraSeleccionada) {
+            system("cls");
+            imprimirPuntajes();
+            gotoxy(0, 0);
+            cout << "ADIVINE LA PALABRA" << endl;
+            cout << "Tiene " << intentos << " Intentos restantes" << endl;
+            cout << "Palabra: " << palabraAdivinada << endl;
+            char letra;
+            cout << "Ingrese una letra: ";
+            cin >> letra;
+
+            bool letraEncontrada = false;
+            for (size_t i = 0; i < palabraSeleccionada.size(); ++i) {
+                if (palabraSeleccionada[i] == letra) {
+                    palabraAdivinada[i] = letra;
+                    letraEncontrada = true;
+                }
+            }
+            if (!letraEncontrada) {
+                --intentos;
             }
         }
-        if (!letraEncontrada) {
-            --intentos;
+
+        int puntaje = 0;
+        if (palabraAdivinada == palabraSeleccionada) {
+            puntaje = 20 * intentos;
+            ofstream archivoPuntajes("PUNTEO.txt", ios_base::app);
+            archivoPuntajes << nombre << "|" << puntaje << "\n";
+            system("cls");
+            cout << "¡Felicidades ha adivinado la palabra " << palabraSeleccionada << "!" << endl;
+            imprimirPuntajesCompletos();
+        } else {
+            system("cls");
+            cout << "No has adivinado la palabra. La palabra era: " << palabraSeleccionada << endl;
+            imprimirPuntajesCompletos();
         }
-    }
 
-    int puntaje = 0;
-    if (palabraAdivinada == palabraSeleccionada) {
-        puntaje = 20 * intentos;
-        ofstream archivoPuntajes("punteo.txt", ios_base::app);
-        archivoPuntajes << nombre << "|" << puntaje << "\n";
-        system("cls");
-        cout << "¡Felicidades ha adivinado la palabra " << palabraSeleccionada << "!" << endl;
+        cout << "¿Desea jugar de nuevo? (S/N): ";
+        cin >> opcion;
 
-    } else {
-        system("cls");
-        cout << "No has adivinado la palabra. La palabra era: " << palabraSeleccionada << endl;
-    }
-
-    cout << "Presiona ENTER para continuar...";
+    } while (opcion == 'S' || opcion == 's');
+    cout <<"Presiona ENTER para continuar...";
     cin.ignore();
     cin.get();
 
