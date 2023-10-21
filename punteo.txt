@@ -1,7 +1,5 @@
-Gerardo|20
-Gerardo|80
-Manin|100
+Manin|10
 Luis|80
-ll|10
-manin|20
-prueba2|40
+Wilson|10
+Helder|20
+Will|40
